@@ -1,0 +1,24 @@
+<%- include('partials/header', { title: "Landing" }) %>
+<h1>Welcome <%=username %></h1>
+
+<div class="dashboard">
+    <% if (role === 'admin') { %>
+        <h2> List of all the users:</h2>
+        
+        <ul>
+        <% for(var i = 0; i < userList.length; i++) { %>
+            <p><%= Username: userList[i].username %></p>
+        <% } %>
+        </ul>
+
+        <% } else if (role === 'user') { %>
+            <ul>
+                <p>Logged in</p>
+            </ul>
+        <% } %>
+
+        <form action = "/logout" method = "POST">
+            <p><a href="/">Go back</a></p>
+        </form>
+</div>
+<%- include('partials/footer') %>

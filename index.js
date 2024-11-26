@@ -39,6 +39,12 @@ const USERS = [
     },
 ];
 
+// POST /logout - Logs out the user
+app.post("/logout", (request, response) => {
+    request.session.destroy();
+    response.redirect("index");
+});
+
 // GET /login - Render login form
 app.get("/login", (request, response) => {
     response.render("login");
