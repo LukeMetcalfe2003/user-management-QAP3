@@ -42,40 +42,89 @@ const USERS = [
 // POST /logout - Logs out the user
 app.post("/logout", (request, response) => {
     request.session.destroy();
-    response.redirect("index");
+    response.redirect("/");
 });
 
 // GET /login - Render login form
 app.get("/login", (request, response) => {
-    response.render("login");
+    const errorMsg = request.query.error || null;
+    response.render("login", { errorMsg });
 });
 
 // POST /login - Allows a user to login
 app.post("/login", (request, response) => {
+    const {email, password} = request.body;
+    const user = USERS.find((user) => user.email === email);
 
+    // if correct user and password go to landing page
+    if (!!user && bcrypt.compareSync(password, user.password)) {
+        request.session.username = user.username;
+        request.session.role = user.role;
+        request.session.email = user.email;
+        return response.redirect("/landing");
+    }
+
+    // Incorrect user and password
+    return response.status(400).render("login", { 
+        errorMsg: "Incorrect email or password" 
+    });
 });
 
 // GET /signup - Render signup form
 app.get("/signup", (request, response) => {
-    response.render("signup");
+    const errorMsg = request.query.error || null;
+    response.render("signup", { errorMsg });
 });
 
 // POST /signup - Allows a user to signup
 app.post("/signup", (request, response) => {
-    
+    const {username, email, password} = request.body;
+
+    // Validations
+    if (USERS.find((user) => user.username === username)) {
+        return response.status(400).render("signup", {
+            errorMsg: "Username already exists",
+        });
+    } else if (USERS.find((user) => user.email === email)) {
+        return response.status(400).render("signup", {
+            errorMsg: "Email already exists",
+        });
+    }
+
+    // Add user to USERS array
+    USERS.push({
+        username,
+        password: bcrypt.hashSync(password, SALT_ROUNDS),
+        email,
+        role: "user",
+    });
+    console.log("User added successfully");
+    return response.redirect("/");
 });
 
 // GET / - Render index page or redirect to landing if logged in
 app.get("/", (request, response) => {
-    if (request.session.user) {
+    const userEmail = request.session.email;
+    const errorMsg = request.query.error || null;
+
+    if (request.session.username) {
         return response.redirect("/landing");
     }
-    response.render("index");
+    response.render("index", { userEmail, errorMsg });
 });
 
 // GET /landing - Shows a welcome page for users, shows the names of all users if an admin
 app.get("/landing", (request, response) => {
-    
+    const username = request.session.username;
+    const role = request.session.role;
+
+    // Admin role
+    if (role === "admin") {
+        return response.render("landing", {username, users: USERS});
+    }
+
+    // user role
+    return response.render("landing", { username, users: null });
 });
 
 // Start server

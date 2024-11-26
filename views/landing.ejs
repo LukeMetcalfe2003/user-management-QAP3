@@ -1,24 +1,20 @@
 <%- include('partials/header', { title: "Landing" }) %>
 <h1>Welcome <%=username %></h1>
 
-<div class="dashboard">
-    <% if (role === 'admin') { %>
-        <h2> List of all the users:</h2>
-        
+<% if (users) { %>
+    <h2>List of users:</h2>
+    <% users.forEach((user) => { %>
         <ul>
-        <% for(var i = 0; i < userList.length; i++) { %>
-            <p><%= Username: userList[i].username %></p>
-        <% } %>
+            <li>
+        <p>Username:<%= user.username %></p>
+        <p>Email:<%= user.email %></p>
+        <p>Role:<%= user.role %></p>
+
+        </li>
         </ul>
+        <% })%>
+<% } %>
 
-        <% } else if (role === 'user') { %>
-            <ul>
-                <p>Logged in</p>
-            </ul>
-        <% } %>
-
-        <form action = "/logout" method = "POST">
-            <button type="submit">Logout</button>
-        </form>
-</div>
+<form action = "/logout" method = "POST">
+    <button type="submit">Logout</button>
 <%- include('partials/footer') %>
